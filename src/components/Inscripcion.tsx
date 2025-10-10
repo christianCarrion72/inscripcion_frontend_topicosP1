@@ -5,6 +5,7 @@ import { useState } from "react";
 import SeleccionMaterias from "./SeleccionMaterias";
 import SeleccionGrupos from "./SeleccionGrupos";
 import ConfirmacionInscripcion from "./ConfirmacionInscripcion";
+import TareaPendiente from "./TareaPendiente";
 
 interface ResultadoInscripcion {
     status: "CONFIRMED" | "REJECTED";
@@ -16,13 +17,18 @@ interface ResultadoInscripcion {
     grupos?: number[];
 }
 
+interface TareaInscripcion {
+    jobId: string;
+    mensaje: string;
+    notificationEndpoint: string;
+}
+
 export default function Inscripcion() {
     const { data: session } = useSession();
     const [paso, setPaso] = useState(1);
     const [materiasSeleccionadas, setMateriasSeleccionadas] = useState<number[]>([]);
     const [resultado, setResultado] = useState<ResultadoInscripcion | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [loadingMessage, setLoadingMessage] = useState("Procesando...");
+    const [tarea, setTarea] = useState<TareaInscripcion | null>(null);
 
     const handleSeleccionMaterias = (materias: number[]) => {
         setMateriasSeleccionadas(materias);
@@ -30,9 +36,6 @@ export default function Inscripcion() {
     };
 
     const handleInscribir = async (idsGrupoMateria: number[]) => {
-        setLoading(true);
-        setLoadingMessage("Enviando solicitud de inscripción...");
-        
         try {
             const callbackBaseUrl = typeof window !== 'undefined' 
                 ? `${window.location.origin}/api/callbacks`
@@ -57,128 +60,90 @@ export default function Inscripcion() {
                 throw new Error(data.message || "Error al procesar inscripción");
             }
 
-            // Si es una respuesta asíncrona
-            if (data.jobId) {
-                setLoadingMessage("Procesando inscripción...");
-                await pollJobStatus(data.jobId);
-            } else {
-                // Respuesta síncrona directa
-                setResultado(data as ResultadoInscripcion);
-                setPaso(3);
-                setLoading(false);
-            }
+            // Guardar la tarea pendiente
+            setTarea({
+                jobId: data.jobId,
+                mensaje: data.mensaje || "Procesando Tarea",
+                notificationEndpoint: data.notificationEndpoint
+            });
+            setPaso(3);
+            
         } catch (err) {
             setResultado({
                 status: "REJECTED",
                 reason: err instanceof Error ? err.message : "Error al procesar la inscripción",
             });
             setPaso(3);
-            setLoading(false);
         }
     };
 
-    const pollJobStatus = async (jobId: string) => {
-        const maxAttempts = 60; // 60 segundos para inscripción
-        let attempts = 0;
-
-        const checkStatus = async () => {
-            try {
-                // Intentar obtener del callback local primero
-                const callbackRes = await fetch(`/api/callbacks/${jobId}`);
+    const consultarEstado = async (jobId: string) => {
+        try {
+            // Intentar obtener del callback local primero
+            const callbackRes = await fetch(`/api/callbacks/${jobId}`);
+            
+            if (callbackRes.ok) {
+                const callbackData = await callbackRes.json();
                 
-                if (callbackRes.ok) {
-                    const callbackData = await callbackRes.json();
-                    
-                    if (callbackData.status === 'completed' && callbackData.result) {
-                        setResultado(callbackData.result as ResultadoInscripcion);
-                        setPaso(3);
-                        setLoading(false);
-                        return;
-                    } else if (callbackData.status === 'failed') {
-                        setResultado({
-                            status: "REJECTED",
-                            reason: callbackData.error || 'Error procesando la inscripción',
-                        });
-                        setPaso(3);
-                        setLoading(false);
-                        return;
-                    }
+                if (callbackData.status === 'completed' && callbackData.result) {
+                    setResultado(callbackData.result as ResultadoInscripcion);
+                    setTarea(null);
+                    return;
+                } else if (callbackData.status === 'failed') {
+                    setResultado({
+                        status: "REJECTED",
+                        reason: callbackData.error || 'Error procesando la inscripción',
+                    });
+                    setTarea(null);
+                    return;
                 }
-
-                // Si no está en callback, consultar el backend
-                const statusRes = await fetch(
-                    `${process.env.NEXT_PUBLIC_BACKEND_URL}/tareas/status/${jobId}`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${session?.user?.token}`,
-                        },
-                    }
-                );
-
-                if (statusRes.ok) {
-                    const statusData = await statusRes.json();
-                    
-                    if (statusData.status === 'completed') {
-                        setResultado(statusData.result as ResultadoInscripcion);
-                        setPaso(3);
-                        setLoading(false);
-                        return;
-                    } else if (statusData.status === 'failed') {
-                        setResultado({
-                            status: "REJECTED",
-                            reason: statusData.result || 'Error procesando la inscripción',
-                        });
-                        setPaso(3);
-                        setLoading(false);
-                        return;
-                    }
-                    
-                    const progress = statusData.progress || 0;
-                    setLoadingMessage(`Procesando inscripción... (${progress}%)`);
-                }
-
-                attempts++;
-                if (attempts < maxAttempts) {
-                    setTimeout(checkStatus, 1000);
-                } else {
-                    throw new Error('Tiempo de espera agotado. Por favor, verifica tu inscripción más tarde.');
-                }
-            } catch (err) {
-                setResultado({
-                    status: "REJECTED",
-                    reason: err instanceof Error ? err.message : "Error consultando estado",
-                });
-                setPaso(3);
-                setLoading(false);
             }
-        };
 
-        checkStatus();
+            // Si no está en callback, consultar el backend
+            const statusRes = await fetch(
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/tareas/status/${jobId}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${session?.user?.token}`,
+                    },
+                }
+            );
+
+            if (statusRes.ok) {
+                const statusData = await statusRes.json();
+                
+                if (statusData.status === 'completed') {
+                    setResultado(statusData.result as ResultadoInscripcion);
+                    setTarea(null);
+                } else if (statusData.status === 'failed') {
+                    setResultado({
+                        status: "REJECTED",
+                        reason: statusData.result || 'Error procesando la inscripción',
+                    });
+                    setTarea(null);
+                } else {
+                    // Aún está procesando
+                    alert(`Estado: ${statusData.status}. La tarea aún está en proceso.`);
+                }
+            } else {
+                throw new Error('No se pudo consultar el estado');
+            }
+        } catch (err) {
+            alert(err instanceof Error ? err.message : "Error consultando estado");
+        }
     };
 
     const reiniciar = () => {
         setPaso(1);
         setMateriasSeleccionadas([]);
         setResultado(null);
+        setTarea(null);
     };
 
-    if (loading) {
-        return (
-            <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-                <div className="flex flex-col items-center justify-center py-12">
-                    <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mb-4"></div>
-                    <p className="text-gray-600 text-lg font-semibold">{loadingMessage}</p>
-                    <p className="text-gray-500 text-sm mt-2">
-                        Por favor espera, esto puede tomar unos momentos...
-                    </p>
-                </div>
-            </div>
-        );
-    }
-
     return (
-        <>
+        <div className="space-y-6">
             {paso === 1 && <SeleccionMaterias onNext={handleSeleccionMaterias} />}
+            
             {paso === 2 && (
                 <SeleccionGrupos
                     materiasIds={materiasSeleccionadas}
@@ -186,12 +151,24 @@ export default function Inscripcion() {
                     onInscribir={handleInscribir}
                 />
             )}
-            {paso === 3 && resultado && (
-                <ConfirmacionInscripcion
-                    resultado={resultado}
-                    onReiniciar={reiniciar}
-                />
+            
+            {paso === 3 && (
+                <>
+                    {tarea && (
+                        <TareaPendiente 
+                            tarea={tarea} 
+                            onConsultar={consultarEstado} 
+                        />
+                    )}
+                    
+                    {resultado && (
+                        <ConfirmacionInscripcion
+                            resultado={resultado}
+                            onReiniciar={reiniciar}
+                        />
+                    )}
+                </>
             )}
-        </>
+        </div>
     );
 }
