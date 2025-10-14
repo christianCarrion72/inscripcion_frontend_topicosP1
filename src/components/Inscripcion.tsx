@@ -6,6 +6,7 @@ import SeleccionMaterias from "./SeleccionMaterias";
 import SeleccionGrupos from "./SeleccionGrupos";
 import ConfirmacionInscripcion from "./ConfirmacionInscripcion";
 import TareaPendiente from "./TareaPendiente";
+import { useMateriasContext } from "./MateriasContext";
 
 interface ResultadoInscripcion {
     status: "CONFIRMED" | "REJECTED";
@@ -25,6 +26,7 @@ interface TareaInscripcion {
 
 export default function Inscripcion() {
     const { data: session } = useSession();
+    const { limpiarDatos } = useMateriasContext();
     const [paso, setPaso] = useState(1);
     const [materiasSeleccionadas, setMateriasSeleccionadas] = useState<number[]>([]);
     const [resultado, setResultado] = useState<ResultadoInscripcion | null>(null);
@@ -60,7 +62,6 @@ export default function Inscripcion() {
                 throw new Error(data.message || "Error al procesar inscripción");
             }
 
-            // Guardar la tarea pendiente
             setTarea({
                 jobId: data.jobId,
                 mensaje: data.mensaje || "Procesando Tarea",
@@ -79,7 +80,6 @@ export default function Inscripcion() {
 
     const consultarEstado = async (jobId: string) => {
         try {
-            // Intentar obtener del callback local primero
             const callbackRes = await fetch(`/api/callbacks/${jobId}`);
             
             if (callbackRes.ok) {
@@ -99,7 +99,6 @@ export default function Inscripcion() {
                 }
             }
 
-            // Si no está en callback, consultar el backend
             const statusRes = await fetch(
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/tareas/status/${jobId}`,
                 {
@@ -122,7 +121,6 @@ export default function Inscripcion() {
                     });
                     setTarea(null);
                 } else {
-                    // Aún está procesando
                     alert(`Estado: ${statusData.status}. La tarea aún está en proceso.`);
                 }
             } else {
@@ -138,6 +136,12 @@ export default function Inscripcion() {
         setMateriasSeleccionadas([]);
         setResultado(null);
         setTarea(null);
+        limpiarDatos();
+    };
+
+    const volverPaso1 = () => {
+        setPaso(1);
+        setMateriasSeleccionadas([]);
     };
 
     return (
@@ -147,7 +151,7 @@ export default function Inscripcion() {
             {paso === 2 && (
                 <SeleccionGrupos
                     materiasIds={materiasSeleccionadas}
-                    onBack={() => setPaso(1)}
+                    onBack={volverPaso1}
                     onInscribir={handleInscribir}
                 />
             )}

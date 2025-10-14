@@ -2,24 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useState } from "react";
-
-interface Materia {
-    id: number;
-    nombre: string;
-    codigo: string;
-}
-
-interface MateriasDisponibles {
-    estudiante: {
-        id: number;
-        nombre: string;
-        registro: number;
-        planEstudio: string;
-    };
-    materiasAprobadas: number;
-    materiasDisponibles: number;
-    materiasPorNivel: Record<string, Materia[]>;
-}
+import { useMateriasContext } from "./MateriasContext";
 
 interface SeleccionMateriasProps {
     onNext: (materiasIds: number[]) => void;
@@ -27,7 +10,7 @@ interface SeleccionMateriasProps {
 
 export default function SeleccionMaterias({ onNext }: SeleccionMateriasProps) {
     const { data: session } = useSession();
-    const [materiasDisponibles, setMateriasDisponibles] = useState<MateriasDisponibles | null>(null);
+    const { materiasDisponibles, setMateriasDisponibles } = useMateriasContext();
     const [materiasSeleccionadas, setMateriasSeleccionadas] = useState<number[]>([]);
     const [loading, setLoading] = useState(false);
     const [loadingMessage, setLoadingMessage] = useState("Cargando...");
@@ -39,7 +22,6 @@ export default function SeleccionMaterias({ onNext }: SeleccionMateriasProps) {
         setError(null);
         
         try {
-            // Obtener la URL base del frontend para el callback
             const callbackBaseUrl = typeof window !== 'undefined' 
                 ? `${window.location.origin}/api/callbacks`
                 : 'http://localhost:3000/api/callbacks';
@@ -62,12 +44,10 @@ export default function SeleccionMaterias({ onNext }: SeleccionMateriasProps) {
                 throw new Error(data.message || "Error al cargar materias");
             }
 
-            // Si es una respuesta asíncrona (con jobId)
             if (data.jobId) {
                 setLoadingMessage("Procesando solicitud...");
                 await pollJobStatus(data.jobId);
             } else {
-                // Respuesta síncrona directa
                 setMateriasDisponibles(data);
                 setLoading(false);
             }
@@ -78,12 +58,11 @@ export default function SeleccionMaterias({ onNext }: SeleccionMateriasProps) {
     };
 
     const pollJobStatus = async (jobId: string) => {
-        const maxAttempts = 30; // 30 segundos máximo
+        const maxAttempts = 30;
         let attempts = 0;
 
         const checkStatus = async () => {
             try {
-                // Primero intentar obtener del callback local
                 const callbackRes = await fetch(`/api/callbacks/${jobId}`);
                 
                 if (callbackRes.ok) {
@@ -98,7 +77,6 @@ export default function SeleccionMaterias({ onNext }: SeleccionMateriasProps) {
                     }
                 }
 
-                // Si no está en callback, consultar el backend
                 const statusRes = await fetch(
                     `${process.env.NEXT_PUBLIC_BACKEND_URL}/tareas/status/${jobId}`,
                     {
@@ -124,7 +102,7 @@ export default function SeleccionMaterias({ onNext }: SeleccionMateriasProps) {
 
                 attempts++;
                 if (attempts < maxAttempts) {
-                    setTimeout(checkStatus, 1000); // Reintentar cada segundo
+                    setTimeout(checkStatus, 1000);
                 } else {
                     throw new Error('Tiempo de espera agotado');
                 }
