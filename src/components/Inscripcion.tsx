@@ -2,6 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useState } from "react";
+import Swal from "sweetalert2";
 import SeleccionMaterias from "./SeleccionMaterias";
 import SeleccionGrupos from "./SeleccionGrupos";
 import ConfirmacionInscripcion from "./ConfirmacionInscripcion";
@@ -121,13 +122,27 @@ export default function Inscripcion() {
                     });
                     setTarea(null);
                 } else {
-                    alert(`Estado: ${statusData.status}. La tarea aún está en proceso.`);
+                    // Usar SweetAlert2 en lugar de alert
+                    await Swal.fire({
+                        icon: 'info',
+                        title: 'Procesando...',
+                        html: `<p>Estado: <strong>${statusData.status}</strong></p><p>La tarea aún está en proceso.</p>`,
+                        confirmButtonText: 'Entendido',
+                        confirmButtonColor: '#3b82f6',
+                    });
                 }
             } else {
                 throw new Error('No se pudo consultar el estado');
             }
         } catch (err) {
-            alert(err instanceof Error ? err.message : "Error consultando estado");
+            // Usar SweetAlert2 para errores
+            await Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: err instanceof Error ? err.message : "Error consultando estado",
+                confirmButtonText: 'Cerrar',
+                confirmButtonColor: '#ef4444',
+            });
         }
     };
 
