@@ -27,7 +27,7 @@ export default function SeleccionMaterias({ onNext }: SeleccionMateriasProps) {
                 : 'http://localhost:3000/api/callbacks';
 
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/estudiantes/materias-disponibles`,
+                `${process.env.NEXT_PUBLIC_GATEWAY_URL}/api/estudiantes/materias-disponibles`,
                 {
                     method: "GET",
                     headers: {
@@ -78,7 +78,7 @@ export default function SeleccionMaterias({ onNext }: SeleccionMateriasProps) {
                 }
 
                 const statusRes = await fetch(
-                    `${process.env.NEXT_PUBLIC_BACKEND_URL}/tareas/status/${jobId}`,
+                    `${process.env.NEXT_PUBLIC_GATEWAY_URL}/api/tareas/status/${jobId}`,
                     {
                         headers: {
                             Authorization: `Bearer ${session?.user?.token}`,

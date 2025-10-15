@@ -45,7 +45,7 @@ export default function Inscripcion() {
                 : 'http://localhost:3000/api/callbacks';
 
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/inscripcions/request-seat`,
+                `${process.env.NEXT_PUBLIC_GATEWAY_URL}/api/inscripcions/request-seat`,
                 {
                     method: "POST",
                     headers: {
@@ -101,7 +101,7 @@ export default function Inscripcion() {
             }
 
             const statusRes = await fetch(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/tareas/status/${jobId}`,
+                `${process.env.NEXT_PUBLIC_GATEWAY_URL}/api/tareas/status/${jobId}`,
                 {
                     headers: {
                         Authorization: `Bearer ${session?.user?.token}`,
