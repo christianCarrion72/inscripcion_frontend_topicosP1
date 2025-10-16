@@ -25,7 +25,11 @@ interface TareaInscripcion {
     notificationEndpoint: string;
 }
 
-export default function Inscripcion() {
+interface InscripcionProps {
+    onVerHistorial?: () => void;
+}
+
+export default function Inscripcion({ onVerHistorial }: InscripcionProps) {
     const { data: session } = useSession();
     const { limpiarDatos } = useMateriasContext();
     const [paso, setPaso] = useState(1);
@@ -122,7 +126,6 @@ export default function Inscripcion() {
                     });
                     setTarea(null);
                 } else {
-                    // Usar SweetAlert2 en lugar de alert
                     await Swal.fire({
                         icon: 'info',
                         title: 'Procesando...',
@@ -135,7 +138,6 @@ export default function Inscripcion() {
                 throw new Error('No se pudo consultar el estado');
             }
         } catch (err) {
-            // Usar SweetAlert2 para errores
             await Swal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -152,6 +154,12 @@ export default function Inscripcion() {
         setResultado(null);
         setTarea(null);
         limpiarDatos();
+    };
+
+    const handleVerHistorial = () => {
+        if (onVerHistorial) {
+            onVerHistorial();
+        }
     };
 
     const volverPaso1 = () => {
@@ -184,6 +192,7 @@ export default function Inscripcion() {
                         <ConfirmacionInscripcion
                             resultado={resultado}
                             onReiniciar={reiniciar}
+                            onVerHistorial={handleVerHistorial}
                         />
                     )}
                 </>
