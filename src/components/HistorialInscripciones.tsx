@@ -57,7 +57,7 @@ export default function HistorialInscripciones() {
                 : 'http://localhost:3000/api/callbacks';
 
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/inscripcions/historial`,
+                `${process.env.NEXT_PUBLIC_GATEWAY_URL}/api/inscripcions/historial`,
                 {
                     method: "GET",
                     headers: {
@@ -108,7 +108,7 @@ export default function HistorialInscripciones() {
                 }
 
                 const statusRes = await fetch(
-                    `${process.env.NEXT_PUBLIC_BACKEND_URL}/tareas/status/${jobId}`,
+                    `${process.env.NEXT_PUBLIC_GATEWAY_URL}/api/tareas/status/${jobId}`,
                     {
                         headers: {
                             Authorization: `Bearer ${session?.user?.token}`,
