@@ -5,11 +5,11 @@ const callbackStore = new Map<string, any>();
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ jobId: string }> } // 👈 params ahora es Promise
+  { params }: { params: Promise<{ jobId: string }> } 
 ) {
   try {
     const body = await request.json();
-    const { jobId } = await params; // 👈 await aquí
+    const { jobId } = await params; 
 
     console.log(`📥 Callback recibido para job ${jobId}:`, {
       status: body.status,
@@ -47,10 +47,10 @@ export async function POST(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ jobId: string }> } // 👈 igual aquí
+  { params }: { params: Promise<{ jobId: string }> } 
 ) {
   try {
-    const { jobId } = await params; // 👈 y aquí también
+    const { jobId } = await params; 
     const data = callbackStore.get(jobId);
 
     if (!data) {
@@ -77,9 +77,9 @@ export async function GET(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ jobId: string }> } // 👈 y también aquí
+  { params }: { params: Promise<{ jobId: string }> } 
 ) {
-  const { jobId } = await params; // 👈 await aquí
+  const { jobId } = await params; 
   const existed = callbackStore.delete(jobId);
 
   return NextResponse.json({

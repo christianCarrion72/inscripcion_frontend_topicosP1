@@ -26,8 +26,9 @@ export default function SeleccionMaterias({ onNext }: SeleccionMateriasProps) {
                 ? `${window.location.origin}/api/callbacks`
                 : 'http://localhost:3000/api/callbacks';
 
+            const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://api-gateway:3005/proxy';
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_GATEWAY_URL}/api/estudiantes/materias-disponibles`,
+                `${gatewayUrl}/api/estudiantes/materias-disponibles`,
                 {
                     method: "GET",
                     headers: {
@@ -77,8 +78,9 @@ export default function SeleccionMaterias({ onNext }: SeleccionMateriasProps) {
                     }
                 }
 
+                const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://api-gateway:3005/proxy';
                 const statusRes = await fetch(
-                    `${process.env.NEXT_PUBLIC_GATEWAY_URL}/api/tareas/status/${jobId}`,
+                    `${gatewayUrl}/api/tareas/status/${jobId}`,
                     {
                         headers: {
                             Authorization: `Bearer ${session?.user?.token}`,

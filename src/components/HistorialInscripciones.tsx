@@ -56,8 +56,9 @@ export default function HistorialInscripciones() {
                 ? `${window.location.origin}/api/callbacks`
                 : 'http://localhost:3000/api/callbacks';
 
+            const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://api-gateway:3005/proxy';
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_GATEWAY_URL}/api/inscripcions/historial`,
+                `${gatewayUrl}/api/inscripcions/historial`,
                 {
                     method: "GET",
                     headers: {
@@ -107,8 +108,9 @@ export default function HistorialInscripciones() {
                     }
                 }
 
+                const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://api-gateway:3005/proxy';
                 const statusRes = await fetch(
-                    `${process.env.NEXT_PUBLIC_GATEWAY_URL}/api/tareas/status/${jobId}`,
+                    `${gatewayUrl}/api/tareas/status/${jobId}`,
                     {
                         headers: {
                             Authorization: `Bearer ${session?.user?.token}`,

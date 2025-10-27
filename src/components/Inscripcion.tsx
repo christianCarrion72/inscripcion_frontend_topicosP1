@@ -48,8 +48,9 @@ export default function Inscripcion({ onVerHistorial }: InscripcionProps) {
                 ? `${window.location.origin}/api/callbacks`
                 : 'http://localhost:3000/api/callbacks';
 
+            const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://api-gateway:3005/proxy';
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_GATEWAY_URL}/api/inscripcions/request-seat`,
+                `${gatewayUrl}/api/inscripcions/request-seat`,
                 {
                     method: "POST",
                     headers: {
@@ -104,8 +105,9 @@ export default function Inscripcion({ onVerHistorial }: InscripcionProps) {
                 }
             }
 
+            const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://api-gateway:3005/proxy';
             const statusRes = await fetch(
-                `${process.env.NEXT_PUBLIC_GATEWAY_URL}/api/tareas/status/${jobId}`,
+                `${gatewayUrl}/api/tareas/status/${jobId}`,
                 {
                     headers: {
                         Authorization: `Bearer ${session?.user?.token}`,
