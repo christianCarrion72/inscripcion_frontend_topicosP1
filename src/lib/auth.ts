@@ -12,8 +12,9 @@ export const authOptions: AuthOptions = {
       async authorize(credentials) {
         if (!credentials) return null;
 
+        const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://localhost:3005/proxy';
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_GATEWAY_URL}/api/auth/login/estudiante-docente`,
+          `${gatewayUrl}/api/auth/login/estudiante-docente`,
           {
             method: "POST",
             body: JSON.stringify({

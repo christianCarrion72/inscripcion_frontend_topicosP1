@@ -48,7 +48,8 @@ export default function Inscripcion({ onVerHistorial }: InscripcionProps) {
                 ? `${window.location.origin}/api/callbacks`
                 : 'http://localhost:3000/api/callbacks';
 
-            const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://api-gateway:3005/proxy';
+            const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://localhost:3005/proxy';
+            //const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://api-gateway:3005/proxy';
             const res = await fetch(
                 `${gatewayUrl}/api/inscripcions/request-seat`,
                 {
@@ -105,7 +106,9 @@ export default function Inscripcion({ onVerHistorial }: InscripcionProps) {
                 }
             }
 
-            const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://api-gateway:3005/proxy';
+
+            const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://localhost:3005/proxy';
+            //const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://api-gateway:3005/proxy';
             const statusRes = await fetch(
                 `${gatewayUrl}/api/tareas/status/${jobId}`,
                 {
