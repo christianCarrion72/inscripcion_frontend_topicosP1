@@ -53,7 +53,7 @@ export default function HistorialInscripciones() {
 
         try {
             const callbackBaseUrl = typeof window !== 'undefined' 
-                ? `${window.location.origin}/api/callbacks`
+                ? `host.docker.internal:3000/api/callbacks`
                 : 'http://localhost:3000/api/callbacks';
 
             const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://localhost:3005/proxy';
