@@ -13,6 +13,10 @@ RUN npm ci
 # Copiar el código fuente
 COPY . .
 
+# Argumento para la URL del gateway (solo en build)
+ARG NEXT_PUBLIC_GATEWAY_URL
+ENV NEXT_PUBLIC_GATEWAY_URL=$NEXT_PUBLIC_GATEWAY_URL
+
 # Establecer variable para ignorar errores de ESLint durante la compilación
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NEXT_LINT_IGNORE_ERRORS=true

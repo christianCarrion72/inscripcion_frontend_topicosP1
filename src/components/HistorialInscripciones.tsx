@@ -53,11 +53,14 @@ export default function HistorialInscripciones() {
 
         try {
             const callbackBaseUrl = typeof window !== 'undefined' 
-                ? `${window.location.origin}/api/callbacks`
+                ? `host.docker.internal:3000/api/callbacks`
                 : 'http://localhost:3000/api/callbacks';
 
             const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://localhost:3005/proxy';
+<<<<<<< HEAD
             //const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://api-gateway:3005/proxy';
+=======
+>>>>>>> 168efc769e062cc57e986fcb0d72f1331b44c16b
             const res = await fetch(
                 `${gatewayUrl}/api/inscripcions/historial`,
                 {
@@ -110,7 +113,10 @@ export default function HistorialInscripciones() {
                 }
 
                 const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://localhost:3005/proxy';
+<<<<<<< HEAD
                 //const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://api-gateway:3005/proxy';
+=======
+>>>>>>> 168efc769e062cc57e986fcb0d72f1331b44c16b
                 const statusRes = await fetch(
                     `${gatewayUrl}/api/tareas/status/${jobId}`,
                     {
