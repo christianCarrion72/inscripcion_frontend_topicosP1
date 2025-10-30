@@ -2,6 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useState } from "react";
+import { getCallbackBaseUrl } from "@/lib/getCallbackBaseUrl";
 import { useMateriasContext } from "./MateriasContext";
 
 interface SeleccionMateriasProps {
@@ -22,14 +23,10 @@ export default function SeleccionMaterias({ onNext }: SeleccionMateriasProps) {
         setError(null);
         
         try {
-            const callbackBaseUrl = typeof window !== 'undefined' 
-                ?`host.docker.internal:3000/api/callbacks`
-                //? `host.docker.internal:3000/api/callbacks`
-                : 'http://localhost:3000/api/callbacks';
+            const callbackBaseUrl = getCallbackBaseUrl();
 
-            const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://localhost:3005/proxy';
             const res = await fetch(
-                `${gatewayUrl}/api/estudiantes/materias-disponibles`,
+                `/api/gateway/estudiantes/materias-disponibles`,
                 {
                     method: "GET",
                     headers: {
@@ -79,15 +76,11 @@ export default function SeleccionMaterias({ onNext }: SeleccionMateriasProps) {
                     }
                 }
 
-                const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://localhost:3005/proxy';
-                const statusRes = await fetch(
-                    `${gatewayUrl}/api/tareas/status/${jobId}`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${session?.user?.token}`,
-                        },
-                    }
-                );
+                const statusRes = await fetch(`/api/gateway/tareas/status/${jobId}`, {
+                    headers: {
+                        Authorization: `Bearer ${session?.user?.token}`,
+                    },
+                });
 
                 if (statusRes.ok) {
                     const statusData = await statusRes.json();

@@ -13,7 +13,7 @@ export const authOptions: AuthOptions = {
         if (!credentials) return null;
 
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_GATEWAY_URL}/api/auth/login/estudiante-docente`,
+          `${process.env.GATEWAY_URL || "http://localhost:3005/proxy"}/api/auth/login/estudiante-docente`,
           {
             method: "POST",
             body: JSON.stringify({

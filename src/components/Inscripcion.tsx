@@ -2,6 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useState } from "react";
+import { getCallbackBaseUrl } from "@/lib/getCallbackBaseUrl";
 import Swal from "sweetalert2";
 import SeleccionMaterias from "./SeleccionMaterias";
 import SeleccionGrupos from "./SeleccionGrupos";
@@ -44,13 +45,10 @@ export default function Inscripcion({ onVerHistorial }: InscripcionProps) {
 
     const handleInscribir = async (idsGrupoMateria: number[]) => {
         try {
-            const callbackBaseUrl = typeof window !== 'undefined' 
-                ? `host.docker.internal:3000/api/callbacks`
-                : 'http://localhost:3000/api/callbacks';
+            const callbackBaseUrl = getCallbackBaseUrl();
 
-            const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://localhost:3005/proxy';
             const res = await fetch(
-                `${gatewayUrl}/api/inscripcions/request-seat`,
+                `/api/gateway/inscripcions/request-seat`,
                 {
                     method: "POST",
                     headers: {
@@ -105,15 +103,11 @@ export default function Inscripcion({ onVerHistorial }: InscripcionProps) {
                 }
             }
 
-            const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://localhost:3005/proxy';
-            const statusRes = await fetch(
-                `${gatewayUrl}/api/tareas/status/${jobId}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${session?.user?.token}`,
-                    },
-                }
-            );
+            const statusRes = await fetch(`/api/gateway/tareas/status/${jobId}`, {
+                headers: {
+                    Authorization: `Bearer ${session?.user?.token}`,
+                },
+            });
 
             if (statusRes.ok) {
                 const statusData = await statusRes.json();
