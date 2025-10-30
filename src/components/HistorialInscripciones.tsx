@@ -2,6 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useState } from "react";
+import { getCallbackBaseUrl } from "@/lib/getCallbackBaseUrl";
 
 interface Materia {
     id: number;
@@ -52,17 +53,10 @@ export default function HistorialInscripciones() {
         setError(null);
 
         try {
-            const callbackBaseUrl = typeof window !== 'undefined' 
-                ? `host.docker.internal:3000/api/callbacks`
-                : 'http://localhost:3000/api/callbacks';
+            const callbackBaseUrl = getCallbackBaseUrl();
 
-            const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://localhost:3005/proxy';
-<<<<<<< HEAD
-            //const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://api-gateway:3005/proxy';
-=======
->>>>>>> 168efc769e062cc57e986fcb0d72f1331b44c16b
             const res = await fetch(
-                `${gatewayUrl}/api/inscripcions/historial`,
+                `/api/gateway/inscripcions/historial`,
                 {
                     method: "GET",
                     headers: {
@@ -112,19 +106,11 @@ export default function HistorialInscripciones() {
                     }
                 }
 
-                const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://localhost:3005/proxy';
-<<<<<<< HEAD
-                //const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://api-gateway:3005/proxy';
-=======
->>>>>>> 168efc769e062cc57e986fcb0d72f1331b44c16b
-                const statusRes = await fetch(
-                    `${gatewayUrl}/api/tareas/status/${jobId}`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${session?.user?.token}`,
-                        },
-                    }
-                );
+                const statusRes = await fetch(`/api/gateway/tareas/status/${jobId}`, {
+                    headers: {
+                        Authorization: `Bearer ${session?.user?.token}`,
+                    },
+                });
 
                 if (statusRes.ok) {
                     const statusData = await statusRes.json();
